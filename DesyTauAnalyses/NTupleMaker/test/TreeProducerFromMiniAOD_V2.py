@@ -510,7 +510,10 @@ HLTriggerPaths = cms.untracked.vstring(
 'HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v',
 'HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v',
 'HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v',
-'HLT_PFMET170_NoiseCleaned_v'
+'HLT_PFMET170_NoiseCleaned_v',
+'HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v',
+'HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v',
+'HLT_Ele22_eta2p1_WP85_Gsf_LooseIsoPFTau20_v'
 ),
 TriggerProcess = cms.untracked.string("HLT"),
 # tracks
@@ -549,9 +552,13 @@ RecTauPtMin = cms.untracked.double(20),
 RecTauEtaMax = cms.untracked.double(2.3),                                      
 RecTauHLTriggerMatching = cms.untracked.vstring(
 'HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v.*:hltPFTau50TrackPt30LooseAbsOrRelIso',
-'HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v.*:hltL1sMu16erTauJet20er,hltOverlapFilterIsoMu17LooseIsoPFTau20',
-'HLT_Ele22_eta2p1_WP85_Gsf_LooseIsoPFTau20_v.*:hltL1sL1IsoEG20erTauJet20er,hltOverlapFilterIsoEle22WP85GsfLooseIsoPFTau20',
-'HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v.*:hltL1sDoubleTauJet36erORDoubleTauJet68er,hltDoubleL2IsoTau35eta2p1,hltDoublePFTau40TrackPt1MediumIsolationDz02Reg'
+'HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v.*:hltL1sMu16erTauJet20er',
+'HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v.*:hltOverlapFilterIsoMu17LooseIsoPFTau20',
+'HLT_Ele22_eta2p1_WP85_Gsf_LooseIsoPFTau20_v.*:hltL1sL1IsoEG20erTauJet20er',
+'HLT_Ele22_eta2p1_WP85_Gsf_LooseIsoPFTau20_v.*:hltOverlapFilterIsoEle22WP85GsfLooseIsoPFTau20',
+'HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v.*:hltL1sDoubleTauJet36erORDoubleTauJet68er',
+'HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v.*:hltDoubleL2IsoTau35eta2p1',
+'HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v.*:hltDoublePFTau40TrackPt1MediumIsolationDz02Reg'
 ),
 RecTauFloatDiscriminators = cms.untracked.vstring(
 #'againstElectronLoose',
@@ -617,7 +624,7 @@ RecTauFloatDiscriminators = cms.untracked.vstring(
 RecTauBinaryDiscriminators = cms.untracked.vstring(),
 RecTauNum = cms.untracked.int32(0),
 # jets
-RecJetPtMin = cms.untracked.double(30.),
+RecJetPtMin = cms.untracked.double(20.),
 RecJetEtaMax = cms.untracked.double(5.0),
 RecJetHLTriggerMatching = cms.untracked.vstring(),
 RecJetBtagDiscriminators = cms.untracked.vstring(
