@@ -282,6 +282,7 @@ bool IsHLTMatched(string filterName_, std::vector<string> hltfilters, LV trigCan
       break;
     }
   }
+  //cout<<filterName_<<" index "<<filter_index<<endl;
   if(filter_index >= 0){
     if(trigobject_filters[filter_index]){
       if(deltaR(trigCandP4_, LeptonP4_) < 0.5) trigMatch_ = true;
@@ -500,7 +501,7 @@ void fillTrees_TauTauStream(TChain* currentTree,
   currentTree->SetBranchStatus("primvertex_z"        ,1);
   currentTree->SetBranchStatus("primvertex_ndof"        ,1);
   currentTree->SetBranchStatus("numtruepileupinteractions",  1);
-  currentTree->SetBranchStatus("rhoNeutral",    1);
+  currentTree->SetBranchStatus("rho",    1);
   currentTree->SetBranchStatus("muon_count"        ,1);
   currentTree->SetBranchStatus("muon_px"        ,1);
   currentTree->SetBranchStatus("muon_py"        ,1);
@@ -648,7 +649,7 @@ void fillTrees_TauTauStream(TChain* currentTree,
   currentTree->SetBranchAddress("primvertex_z"        ,&primvertex_z);
   currentTree->SetBranchAddress("primvertex_ndof"        ,&primvertex_ndof);
   currentTree->SetBranchAddress("numtruepileupinteractions",  &numtruepileupinteractions);
-  currentTree->SetBranchAddress("rhoNeutral",    &rhoNeutral);
+  currentTree->SetBranchAddress("rho",    &rhoNeutral);
   currentTree->SetBranchAddress("muon_count"        ,&muon_count);
   currentTree->SetBranchAddress("muon_px"        ,muon_px);
   currentTree->SetBranchAddress("muon_py"        ,muon_py);
@@ -809,7 +810,7 @@ void fillTrees_TauTauStream(TChain* currentTree,
   float ptL1,ptL2,etaL1,etaL2,phiL1,phiL2,dRL1L2,dEtaL1L2,dPhiL1L2,dPhiL1J1,dPhiL1J2,dPhiL2J1,dPhiL2J2;
   float dzL1, dzL2, dxyL1, dxyL2; 
   float diTauCharge_, chargeL1_;
-  float MEt, MEtPhi;
+  float MEt, MEtPhi, MtLeg1_, MtLeg2_;
   float MEtMVA, MEtMVAPhi, MtLeg1MVA_, MtLeg2MVA_;
   float MEtCov00,MEtCov01,MEtCov10,MEtCov11;
   float MEtMVACov00,MEtMVACov01,MEtMVACov10,MEtMVACov11;
@@ -943,6 +944,8 @@ void fillTrees_TauTauStream(TChain* currentTree,
   outTree->Branch("MEtCov11", &MEtCov11, "MEtCov11/F");
   outTree->Branch("MEt",      &MEt,     "MEt/F");
   outTree->Branch("MEtPhi",   &MEtPhi,  "MEtPhi/F");
+  outTree->Branch("MtLeg1",   &MtLeg1_,"MtLeg1/F");
+  outTree->Branch("MtLeg2",   &MtLeg2_,"MtLeg2/F");
 
   //TauID
   outTree->Branch("decayModeFindingL1",&decayModeFindingL1_,"decayModeFindingL1/I");
@@ -1368,7 +1371,8 @@ void fillTrees_TauTauStream(TChain* currentTree,
       if(tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau1] > 0.5) tightestHPSDB3HWPL1_ = 2;
       if(tau_byTightCombinedIsolationDeltaBetaCorr3Hits[tau1] > 0.5) tightestHPSDB3HWPL1_ = 3;
       tightestHPSMVA3oldDMwLTWPL1_ = 0;
-      
+      hpsDB3HL1_ = tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[tau1];
+
       decayModeL2_ = 0;
       if(tau_signalChargedHadrCands_size[tau2] == 1 && tau_signalGammaCands_size[tau2]<=0)decayModeL2_ = 1;
       else if(tau_signalChargedHadrCands_size[tau2] == 1 && tau_signalGammaCands_size[tau2]>0)decayModeL2_ = 2;
@@ -1388,6 +1392,7 @@ void fillTrees_TauTauStream(TChain* currentTree,
       if(tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau2] > 0.5) tightestHPSDB3HWPL2_ = 2;
       if(tau_byTightCombinedIsolationDeltaBetaCorr3Hits[tau2] > 0.5) tightestHPSDB3HWPL2_ = 3;
       tightestHPSMVA3oldDMwLTWPL2_ = 0;
+      hpsDB3HL2_ = tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[tau2];
 
       //Apply Tau ES Correction, switch off for now
       //LV Leg1GenJetP4_(tau_genjet_px[tau1], tau_genjet_py[tau1], tau_genjet_pz[tau1], tau_genjet_e[tau1]);
@@ -1441,11 +1446,20 @@ void fillTrees_TauTauStream(TChain* currentTree,
       LV pfMetP4_(pfmet_ex, pfmet_ey, 0, sqrt(pfmet_ex*pfmet_ex + pfmet_ey*pfmet_ey));
       MEt = pfMetP4_.Pt();
       MEtPhi = pfMetP4_.Phi();
+      float scalarSumPtLeg1  = Leg1P4_.pt() + pfMetP4_.pt();
+      float vectorSumPtLeg1  = (Leg1P4_ +  pfMetP4_).pt() ;
+      MtLeg1_  = TMath::Sqrt( scalarSumPtLeg1*scalarSumPtLeg1 - vectorSumPtLeg1*vectorSumPtLeg1 ) ;
+
+      float scalarSumPtLeg2  = Leg2P4_.pt() + pfMetP4_.pt();
+      float vectorSumPtLeg2  = (Leg2P4_ +  pfMetP4_).pt() ;
+      MtLeg2_  = TMath::Sqrt( scalarSumPtLeg2*scalarSumPtLeg2 - vectorSumPtLeg2*vectorSumPtLeg2 ) ;
+
       MEtCov00 = pfmet_sigxx;
       MEtCov01 = pfmet_sigxy;
       MEtCov10 = pfmet_sigyx;
       MEtCov11 = pfmet_sigyy;
 
+      /* no SVfit for now
       /////Perform SVFit to compute di-tau mass
       std::vector<svFitStandalone::MeasuredTauLepton> measuredTauLeptons;
       measuredTauLeptons.push_back(svFitStandalone::MeasuredTauLepton(svFitStandalone::kTauToHadDecay, Leg1P4_.pt(), Leg1P4_.eta(), Leg1P4_.phi(), Leg1P4_.mass(), tau_decayMode[tau1]));
@@ -1476,7 +1490,7 @@ void fillTrees_TauTauStream(TChain* currentTree,
       diTauNSVfitPhi_ = algo.phi();
 
       delete inputFile_visPtResolution;
-
+      */
       LV diTauVisP4_ = Leg1P4_+Leg2P4_;
       diTauVisMass = diTauVisP4_.mass();
       diTauVisPt = diTauVisP4_.pt();
@@ -1487,7 +1501,7 @@ void fillTrees_TauTauStream(TChain* currentTree,
       
       
       //compute 3rd lepton veto
-      int nVetoElectron_ = 0;
+      nVetoElectron_ = 0;
       for(unsigned int ie = 0; ie < electron_count; ie++){
 	LV eleP4_(electron_px[ie], electron_py[ie], electron_pz[ie], sqrt(electron_px[ie]*electron_px[ie] + electron_py[ie]*electron_py[ie] + electron_pz[ie]*electron_pz[ie]));
 	float scEta = electron_superclusterEta[ie];
@@ -1521,7 +1535,7 @@ void fillTrees_TauTauStream(TChain* currentTree,
 	if(pass_eid && eleIso_ < 0.3)nVetoElectron_++;
       } 
 
-      int nVetoMuon_ = 0;
+      nVetoMuon_ = 0;
       for(unsigned int im = 0; im < muon_count; im++){
 	LV muP4_(muon_px[im], muon_py[im], muon_pz[im], sqrt(muon_px[im]*muon_px[im] + muon_py[im]*muon_py[im] + muon_pz[im]*muon_pz[im]));
 	if(muP4_.pt() < 10 || TMath::Abs(muP4_.eta()) > 2.4) continue;
@@ -1531,16 +1545,23 @@ void fillTrees_TauTauStream(TChain* currentTree,
 
       //Get Trigger Informations
       HLTx =  GetTriggerResult((*hltriggerresultsV), "HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v");
-      HLTmatchL1 = false; HLTmatchL2 = false;
+      HLTmatchL1 = 0; HLTmatchL2 = 0;
+      bool matchLeg1Level1_ = false; bool matchLeg1Level2_ = false; bool matchLeg1Level3_ = false;
+      bool matchLeg2Level1_ = false; bool matchLeg2Level2_ = false; bool matchLeg2Level3_ = false;
       for(unsigned int it = 0; it < trigobject_count; it++){
         LV trigCandP4_(trigobject_px[it], trigobject_py[it], trigobject_pz[it], sqrt(trigobject_px[it]*trigobject_px[it] + trigobject_py[it]*trigobject_py[it] + trigobject_pz[it]*trigobject_pz[it]));
-        bool matchLeg1_ = ( IsHLTMatched("hltL1sDoubleTauJet36erORDoubleTauJet68er", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg1P4_) && IsHLTMatched("hltDoubleL2IsoTau35eta2p1", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg1P4_) && IsHLTMatched("hltDoublePFTau40TrackPt1MediumIsolationDz02Reg", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg1P4_) ); 
-	//if(matchLeg1_) HLTmatchL1 = tau_L1trigger_match[tau1];
-	if(matchLeg1_) HLTmatchL1 = matchLeg1_;
-        bool matchLeg2_ = ( IsHLTMatched("hltL1sDoubleTauJet36erORDoubleTauJet68er", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg2P4_) && IsHLTMatched("hltDoubleL2IsoTau35eta2p1", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg2P4_) && IsHLTMatched("hltDoublePFTau40TrackPt1MediumIsolationDz02Reg", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg2P4_) );
-        //if(matchLeg2_) HLTmatchL2 = tau_L1trigger_match[tau2];
-	if(matchLeg2_) HLTmatchL2 = matchLeg2_;
+
+	if(IsHLTMatched("hltL1sDoubleTauJet36erORDoubleTauJet68er", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg1P4_) )matchLeg1Level1_ = true;
+	if(IsHLTMatched("hltDoubleL2IsoTau35eta2p1", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg1P4_) )matchLeg1Level2_ = true;
+	if(IsHLTMatched("hltDoublePFTau40TrackPt1MediumIsolationDz02Reg", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg1P4_) )matchLeg1Level3_ = true;
+	
+	if(IsHLTMatched("hltL1sDoubleTauJet36erORDoubleTauJet68er", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg2P4_) )matchLeg2Level1_ = true;
+	if(IsHLTMatched("hltDoubleL2IsoTau35eta2p1", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg2P4_) )matchLeg2Level2_ = true;
+	if(IsHLTMatched("hltDoublePFTau40TrackPt1MediumIsolationDz02Reg", (*run_hltfilters), trigCandP4_, trigobject_filters[it], Leg2P4_) )matchLeg2Level3_ = true;
+
       }
+      HLTmatchL1 = (matchLeg1Level1_ && matchLeg1Level2_ && matchLeg1Level3_);
+      HLTmatchL2 = (matchLeg2Level1_ && matchLeg2Level2_ && matchLeg2Level3_);
 
       pairIndex = -1;
       if(HLTx && HLTmatchL1 && HLTmatchL2){
